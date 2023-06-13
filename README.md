@@ -3,4 +3,4 @@
 
 
 
-mvn clean deploy -DskipTests -P sonatype-oss-release
+mvn clean deploy -DskipTests -P release
