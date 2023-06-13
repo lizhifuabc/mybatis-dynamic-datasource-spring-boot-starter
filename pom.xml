@@ -17,10 +17,18 @@
     <packaging>jar</packaging>
     <description>mybatis dynamic datasource</description>
 
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+        </license>
+    </licenses>
+
     <developers>
         <developer>
             <name>lizhifu</name>
-            <email>lizhifuabc@gmail.com</email>
+            <email>lizhifuabc@163.com</email>
         </developer>
     </developers>
 
