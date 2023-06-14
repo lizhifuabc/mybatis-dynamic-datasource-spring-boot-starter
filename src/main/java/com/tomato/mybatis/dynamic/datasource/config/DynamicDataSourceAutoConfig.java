@@ -4,6 +4,7 @@ import com.tomato.mybatis.dynamic.datasource.constant.ShardingConstants;
 import com.tomato.mybatis.dynamic.datasource.plugin.MybatisDynamicDatasourcePlugin;
 import com.tomato.mybatis.dynamic.datasource.plugin.MybatisMasterSlavePlugin;
 import com.tomato.mybatis.dynamic.datasource.properties.DynamicDataSourceProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration
 @EnableConfigurationProperties(DynamicDataSourceProperties.class)
 @Import({DynamicDataSourceConfig.class})
+@Slf4j
 public class DynamicDataSourceAutoConfig {
     /**
      * 读写分离插件
@@ -28,6 +30,7 @@ public class DynamicDataSourceAutoConfig {
     @Bean
     @ConditionalOnProperty(prefix = DynamicDataSourceProperties.PREFIX, name = "mode", havingValue = ShardingConstants.MASTER_SLAVE)
     MybatisMasterSlavePlugin mybatisMasterSlavePlugin() {
+        log.info("Mybatis 读写分离插件初始化");
         return new MybatisMasterSlavePlugin();
     }
     /**
@@ -37,6 +40,7 @@ public class DynamicDataSourceAutoConfig {
     @Bean
     @ConditionalOnProperty(prefix = DynamicDataSourceProperties.PREFIX, name = "mode", havingValue = ShardingConstants.SHARDING)
     MybatisDynamicDatasourcePlugin mybatisDynamicDatasourcePlugin() {
+        log.info("Mybatis 分库分表插件初始化");
         return new MybatisDynamicDatasourcePlugin();
     }
 }

@@ -1,6 +1,7 @@
 package com.tomato.mybatis.dynamic.datasource;
 
 import com.tomato.mybatis.dynamic.datasource.context.DynamicDataSourceContextHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 /**
@@ -9,6 +10,7 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
  * @author lizhifu
  * @since 2023/6/13
  */
+@Slf4j
 public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
     /**
      * 获取数据源
@@ -16,6 +18,8 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
      */
     @Override
     protected Object determineCurrentLookupKey() {
-        return DynamicDataSourceContextHolder.getDatasource();
+        String datasource = DynamicDataSourceContextHolder.getDatasource();
+        log.info("动态数据源切换，当前数据源：{}",datasource);
+        return datasource;
     }
 }

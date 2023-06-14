@@ -30,6 +30,7 @@ public class MybatisMasterSlavePlugin implements Interceptor {
         MappedStatement ms = (MappedStatement) args[0];
         try {
             String dataSource = SqlCommandType.SELECT == ms.getSqlCommandType() ? ShardingConstants.DEFAULT_SLAVE : ShardingConstants.DEFAULT_MASTER;
+            log.info("读写分离插件,当前数据源：{}",dataSource);
             DynamicDataSourceContextHolder.setDatasource(dataSource);
             return invocation.proceed();
         } finally {
