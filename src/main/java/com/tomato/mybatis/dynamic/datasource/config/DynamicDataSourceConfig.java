@@ -8,12 +8,13 @@ import com.tomato.mybatis.dynamic.datasource.properties.DynamicDataSourcePropert
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * 数据源工厂
@@ -22,43 +23,36 @@ import java.util.Properties;
  * @since 2023/6/12
  */
 @Slf4j
-public class DynamicDataSourceConfig implements InitializingBean {
-    private final DataSource dataSource;
+public class DynamicDataSourceConfig {
     private final DynamicDataSourceProperties properties;
-    public DynamicDataSourceConfig(DataSource dataSource, DynamicDataSourceProperties properties) {
-        this.dataSource = dataSource;
+    public DynamicDataSourceConfig(DynamicDataSourceProperties properties) {
         this.properties = properties;
     }
-    private DataSource createDataSource(DataSource defaultDataSource, DynamicDataSourceDetailProperties properties) {
-        HikariDataSource defaultHikariDataSource = (HikariDataSource) defaultDataSource;
-        Properties defaultDataSourceProperties = defaultHikariDataSource.getDataSourceProperties();
+    private DataSource createDataSource(DynamicDataSourceDetailProperties properties) {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName(properties.getDriverClassName());
         hikariConfig.setJdbcUrl(properties.getUrl());
         hikariConfig.setUsername(properties.getUsername());
         hikariConfig.setPassword(properties.getPassword());
         // 使用默认数据源的属性配置
-        defaultDataSourceProperties.forEach((key, value) -> hikariConfig.addDataSourceProperty(String.valueOf(key), value));
         return new HikariDataSource(hikariConfig);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @Bean
+    @ConditionalOnProperty(prefix = DynamicDataSourceProperties.PREFIX, name = "mode", havingValue = ShardingConstants.MASTER_SLAVE)
+    public DataSource dataSource() {
+        log.info("初始化配置的数据源");
+        DataSource master = createDataSource(properties.getDatasourceMap().get(ShardingConstants.DEFAULT_MASTER));
+        DataSource slave = createDataSource(properties.getDatasourceMap().get(ShardingConstants.DEFAULT_SLAVE));
+
         DynamicRoutingDataSource dynamicRoutingDataSource = new DynamicRoutingDataSource();
         // 设置默认数据源
-        dynamicRoutingDataSource.setDefaultTargetDataSource(dataSource);
+        dynamicRoutingDataSource.setDefaultTargetDataSource(master);
 
-        log.info("初始化配置的数据源,默认数据源key:{}", ShardingConstants.DEFAULT_MASTER);
-        DynamicDataSourceContextHolder.setDataSourceMap(ShardingConstants.DEFAULT_MASTER,dataSource);
-
-        Map<Object, Object> targetDataSources = new HashMap<>(16);
-        properties.getDatasourceMap().forEach((key, value) -> {
-            log.info("初始化配置的数据源key:{}:value{}",key,value);
-            DataSource target = createDataSource(dataSource, value);
-            DynamicDataSourceContextHolder.setDataSourceMap(key,target);
-            targetDataSources.put(key, target);
-        });
         // 添加数据源
+        Map<Object, Object> targetDataSources = new HashMap<>(16);
+        targetDataSources.put(ShardingConstants.DEFAULT_SLAVE, slave);
         dynamicRoutingDataSource.setTargetDataSources(targetDataSources);
+        return dynamicRoutingDataSource;
     }
 }
