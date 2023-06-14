@@ -1,6 +1,7 @@
 package com.tomato.mybatis.dynamic.datasource.config;
 
-import com.tomato.mybatis.dynamic.datasource.constant.DefaultConstants;
+import com.tomato.mybatis.dynamic.datasource.DynamicRoutingDataSource;
+import com.tomato.mybatis.dynamic.datasource.constant.ShardingConstants;
 import com.tomato.mybatis.dynamic.datasource.context.DynamicDataSourceContextHolder;
 import com.tomato.mybatis.dynamic.datasource.properties.DynamicDataSourceDetailProperties;
 import com.tomato.mybatis.dynamic.datasource.properties.DynamicDataSourceProperties;
@@ -10,10 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
- * 多租户数据源工厂
+ * 数据源工厂
  *
  * @author lizhifu
  * @since 2023/6/12
@@ -41,11 +44,21 @@ public class DynamicDataSourceConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        log.info("初始化配置的数据源,默认数据源key:{}",DefaultConstants.DEFAULT_DATASOURCE);
-        DynamicDataSourceContextHolder.setDataSourceMap(DefaultConstants.DEFAULT_DATASOURCE,dataSource);
+        DynamicRoutingDataSource dynamicRoutingDataSource = new DynamicRoutingDataSource();
+        // 设置默认数据源
+        dynamicRoutingDataSource.setDefaultTargetDataSource(dataSource);
+
+        log.info("初始化配置的数据源,默认数据源key:{}", ShardingConstants.DEFAULT_MASTER);
+        DynamicDataSourceContextHolder.setDataSourceMap(ShardingConstants.DEFAULT_MASTER,dataSource);
+
+        Map<Object, Object> targetDataSources = new HashMap<>(16);
         properties.getDatasourceMap().forEach((key, value) -> {
             log.info("初始化配置的数据源key:{}:value{}",key,value);
-            DynamicDataSourceContextHolder.setDataSourceMap(key,createDataSource(dataSource, value));
+            DataSource target = createDataSource(dataSource, value);
+            DynamicDataSourceContextHolder.setDataSourceMap(key,target);
+            targetDataSources.put(key, target);
         });
+        // 添加数据源
+        dynamicRoutingDataSource.setTargetDataSources(targetDataSources);
     }
 }
