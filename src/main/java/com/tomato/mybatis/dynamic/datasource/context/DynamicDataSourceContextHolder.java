@@ -1,6 +1,7 @@
 package com.tomato.mybatis.dynamic.datasource.context;
 
 import javax.sql.DataSource;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -82,5 +83,11 @@ public class DynamicDataSourceContextHolder {
      */
     public static DataSource getDataSourceMap(String name) {
         return DATASOURCE_MAP.get(name);
+    }
+    /**
+     * 获取多数据源
+     */
+    public static Map<String, DataSource> getDataSourceMapAll() {
+        return DATASOURCE_MAP;
     }
 }
