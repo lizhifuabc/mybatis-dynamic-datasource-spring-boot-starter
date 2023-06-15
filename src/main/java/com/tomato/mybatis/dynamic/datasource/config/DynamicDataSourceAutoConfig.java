@@ -39,8 +39,8 @@ public class DynamicDataSourceAutoConfig {
      */
     @Bean
     @ConditionalOnProperty(prefix = DynamicDataSourceProperties.PREFIX, name = "mode", havingValue = ShardingConstants.SHARDING)
-    MybatisDynamicDatasourcePlugin mybatisDynamicDatasourcePlugin() {
+    MybatisDynamicDatasourcePlugin mybatisDynamicDatasourcePlugin(DynamicDataSourceProperties dynamicDataSourceProperties) {
         log.info("Mybatis 分库分表插件初始化");
-        return new MybatisDynamicDatasourcePlugin();
+        return new MybatisDynamicDatasourcePlugin(dynamicDataSourceProperties);
     }
 }

@@ -31,6 +31,10 @@ public class DynamicDataSourceProperties {
      */
     private Map<String,DynamicTableDetailProperties> tableMap;
     /**
+     * 分片键
+     */
+    private String shardingKey;
+    /**
      * 数据源配置,key:逻辑数据源名
      */
     private Map<String,DynamicDataSourceDetailProperties> datasourceMap;

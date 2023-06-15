@@ -18,8 +18,4 @@ public class DynamicTableDetailProperties {
      * 分表切分策略
      */
     private String tableShardingStrategy;
-    /**
-     * 分片键
-     */
-    private String shardingKey;
 }
