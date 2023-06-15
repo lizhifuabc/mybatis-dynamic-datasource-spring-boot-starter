@@ -2,6 +2,7 @@ package com.tomato.mybatis.dynamic.datasource.plugin;
 
 import com.tomato.mybatis.dynamic.datasource.annotation.Sharding;
 import com.tomato.mybatis.dynamic.datasource.context.DynamicDataSourceContextHolder;
+import com.tomato.mybatis.dynamic.datasource.properties.DynamicDataSourceProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -28,7 +29,14 @@ import java.util.regex.Pattern;
 @Slf4j
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
 public class MybatisDynamicDatasourcePlugin implements Interceptor {
+    private final DynamicDataSourceProperties dynamicDataSourceProperties;
+
     private final Pattern pattern = Pattern.compile("(from|into|update)[\\s]{1,}(\\w{1,})", Pattern.CASE_INSENSITIVE);
+
+    public MybatisDynamicDatasourcePlugin(DynamicDataSourceProperties dynamicDataSourceProperties) {
+        this.dynamicDataSourceProperties = dynamicDataSourceProperties;
+    }
+
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         // 获取StatementHandler
